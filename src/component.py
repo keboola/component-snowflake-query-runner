@@ -27,7 +27,7 @@ KEY_DEBUG = 'debug'
 
 # list of mandatory parameters => if some is missing, component will fail with readable message on initialization.
 
-APP_VERSION = '0.2.3'
+APP_VERSION = '0.0.3'
 sys.tracebacklimit = 0
 
 
