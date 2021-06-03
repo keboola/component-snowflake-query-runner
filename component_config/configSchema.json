@@ -23,6 +23,7 @@
         "#password": {
             "title": "Password",
             "type": "string",
+            "format": "password",
             "description": "A password authenticating the Snowflake user.",
             "propertyOrder": 300
         },
