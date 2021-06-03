@@ -1,0 +1,33 @@
+{
+    "title": "Parameters",
+    "type": "object",
+    "required": [
+        "database",
+        "schema",
+        "query"
+    ],
+    "properties": {
+        "database": {
+            "title": "Database",
+            "type": "string",
+            "description": "Snowflake database in which the query will be executed.",
+            "propertyOrder": 100
+        },
+        "schema": {
+            "title": "Schema",
+            "description": "Snowflake schema in which the query will be executed.",
+            "type": "string",
+            "propertyOrder": 200
+        },
+        "query": {
+            "title": "Query",
+            "description": "Query to execute.",
+            "type": "string",
+            "format": "textarea",
+            "options": {
+                "input_height": "150px"
+            },
+            "propertyOrder": 300
+        }
+    }
+}

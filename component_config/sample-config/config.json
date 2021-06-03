@@ -1,0 +1,12 @@
+{
+  "parameters": {
+    "account": "keboola",
+    "warehouse": "KEBOOLA_WH",
+    "username": "snowflake_user",
+    "#password": "p@ssw0rd",
+    "query": "SELECT * FROM PRODUCT LIMIT 1;",
+    "schema": "in.c-shipmonk_binlog",
+    "database": "MY_DB",
+    "debug": false
+  }
+}

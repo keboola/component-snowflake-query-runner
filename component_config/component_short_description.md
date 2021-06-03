@@ -1,0 +1,1 @@
+Snowflake offers a cloud-based data storage and analytics service, generally termed "data warehouse-as-a-service". It allows corporate users to store and analyze data using cloud-based hardware and software.

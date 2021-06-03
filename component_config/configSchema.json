@@ -1,0 +1,36 @@
+{
+    "title": "Snowflake Connection",
+    "type": "object",
+    "required": [
+        "account",
+        "username",
+        "#password",
+        "warehouse"
+    ],
+    "properties": {
+        "account": {
+            "title": "Account",
+            "type": "string",
+            "description": "Account identifier of the Snowflake instance. This is a prefix of your Snowflake instance URL, e.g. <strong>keboola.eu-central-1</strong>.</br>See <a href='https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name'>the documentation for more information</a>.",
+            "propertyOrder": 100
+        },
+        "username": {
+            "title": "Username",
+            "type": "string",
+            "description": "Snowflake user, which will be used to run queries.",
+            "propertyOrder": 200
+        },
+        "#password": {
+            "title": "Password",
+            "type": "string",
+            "description": "A password authenticating the Snowflake user.",
+            "propertyOrder": 300
+        },
+        "warehouse": {
+            "title": "Warehouse",
+            "type": "string",
+            "description": "Name of the Snowflake warehouse to be used.",
+            "propertyOrder": 400
+        }
+    }
+}
