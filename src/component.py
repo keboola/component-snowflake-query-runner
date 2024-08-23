@@ -1,10 +1,10 @@
-from dataclasses import dataclass
 import logging
 import os
-from pathlib import Path
 import sys
-import snowflake.connector
+from dataclasses import dataclass
+from pathlib import Path
 
+import snowflake.connector
 from keboola.component import CommonInterface
 
 # Snowflake database settings
@@ -110,5 +110,10 @@ class Component(CommonInterface):
                     self._log_query(use_schema_sql)
                     snfk_cursor.execute(use_schema_sql)
 
-                self._log_query(self.parameters.query)
-                snfk_cursor.execute(self.parameters.query)
+                for query in self.parameters.query.split(';'):
+                    query = query.strip()
+                    if query == '':
+                        continue
+                    query = query + ';'
+                    self._log_query(query)
+                    snfk_cursor.execute(query)
