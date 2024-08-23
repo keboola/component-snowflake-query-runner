@@ -1,2 +1,2 @@
 keboola.component==1.6.8
-snowflake-connector-python==2.3.10
+snowflake-connector-python==3.12.1

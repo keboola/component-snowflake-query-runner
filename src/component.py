@@ -1,11 +1,12 @@
 import logging
 import os
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 import snowflake.connector
-from keboola.component import CommonInterface
+from keboola.component import ComponentBase, UserException
 
 # Snowflake database settings
 KEY_ACCT = 'account'
@@ -52,7 +53,7 @@ class Parameters:
     query: str
 
 
-class Component(CommonInterface):
+class Component(ComponentBase):
 
     def __init__(self):
         default_data_dir = Path(__file__).resolve().parent.parent.joinpath('data').as_posix() \
@@ -99,6 +100,13 @@ class Component(CommonInterface):
                                                          'QUERY_TAG': f'{{"runId":"{self.kbc.run_id}"}}'
                                                      })
 
+    @staticmethod
+    def split_sql_queries(sql_string):
+        # Regular expression to split by semicolons not inside quotes
+        queries = re.split(r';(?=(?:[^\'"]|\'[^\']*\'|"[^"]*")*$)', sql_string)
+        queries = [query.strip() for query in queries if query.strip()]
+        return queries
+
     def run(self):
 
         self.create_snfk_connection()
@@ -110,10 +118,22 @@ class Component(CommonInterface):
                     self._log_query(use_schema_sql)
                     snfk_cursor.execute(use_schema_sql)
 
-                for query in self.parameters.query.split(';'):
+                for query in self.split_sql_queries(self.parameters.query):
                     query = query.strip()
                     if query == '':
                         continue
                     query = query + ';'
                     self._log_query(query)
                     snfk_cursor.execute(query)
+
+
+if __name__ == "__main__":
+    try:
+        comp = Component()
+        comp.execute_action()
+    except UserException as exc:
+        logging.exception(exc)
+        exit(1)
+    except Exception as exc:
+        logging.exception(exc)
+        exit(2)

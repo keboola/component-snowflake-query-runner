@@ -1,26 +1,39 @@
-'''
-Created on 12. 11. 2018
-
-@author: esner
-'''
 import unittest
-import mock
-import os
-from freezegun import freeze_time
 
 from component import Component
 
 
 class TestComponent(unittest.TestCase):
 
-    # set global time to 2010-10-10 - affects functions like datetime.now()
-    @freeze_time("2010-10-10")
-    # set KBC_DATADIR env to non-existing dir
-    @mock.patch.dict(os.environ, {'KBC_DATADIR': './non-existing-dir'})
-    def test_run_no_cfg_fails(self):
-        with self.assertRaises(ValueError):
-            comp = Component()
-            comp.run()
+    def test_split_sql_queries_empty_string_returns_empty_list(self):
+        sql_string = ""
+        expected = []
+        result = Component.split_sql_queries(sql_string)
+        self.assertEqual(result, expected)
+
+    def test_split_sql_queries_single_query(self):
+        sql_string = "SELECT * FROM table1"
+        expected = ["SELECT * FROM table1"]
+        result = Component.split_sql_queries(sql_string)
+        self.assertEqual(result, expected)
+
+    def test_split_sql_queries_multiple_queries(self):
+        sql_string = "SELECT * FROM table1; SELECT * FROM table2; SELECT * FROM table3;"
+        expected = ["SELECT * FROM table1", "SELECT * FROM table2", "SELECT * FROM table3"]
+        result = Component.split_sql_queries(sql_string)
+        self.assertEqual(result, expected)
+
+    def test_split_sql_queries_with_semicolon_in_quotes(self):
+        sql_string = "SELECT * FROM table1; SELECT ';'; SELECT * FROM table3;"
+        expected = ["SELECT * FROM table1", "SELECT ';'", "SELECT * FROM table3"]
+        result = Component.split_sql_queries(sql_string)
+        self.assertEqual(result, expected)
+
+    def test_split_sql_queries_with_empty_queries(self):
+        sql_string = "SELECT * FROM table1; ; SELECT * FROM table2;;"
+        expected = ["SELECT * FROM table1", "SELECT * FROM table2"]
+        result = Component.split_sql_queries(sql_string)
+        self.assertEqual(result, expected)
 
 
 if __name__ == "__main__":

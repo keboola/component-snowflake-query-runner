@@ -12,7 +12,9 @@ COPY flake8.cfg ./code/flake8.cfg
 RUN pip install -r /code/requirements.txt
 
 COPY ./src ./code/src/
+COPY ./tests ./code/tests/
 
 WORKDIR /code/
 
-CMD ["python", "-u", "/code/src/run.py"]
+CMD ["python", "-u", "/code/src/component.py"]
+
