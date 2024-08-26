@@ -3,7 +3,6 @@ import os
 import re
 import sys
 from dataclasses import dataclass
-from pathlib import Path
 
 import snowflake.connector
 from keboola.component import ComponentBase, UserException
@@ -56,25 +55,15 @@ class Parameters:
 class Component(ComponentBase):
 
     def __init__(self):
-        default_data_dir = Path(__file__).resolve().parent.parent.joinpath('data').as_posix() \
-            if not os.environ.get('KBC_DATADIR') else None
-
-        logging.info(f'Running version {APP_VERSION}...')
-        super().__init__(data_folder_path=default_data_dir)
+        super().__init__()
         logging.getLogger('snowflake.connector').setLevel(logging.WARNING)
-
-        if self.configuration.parameters.get(KEY_DEBUG, False) is True:
-            logging.getLogger().setLevel(logging.DEBUG)
-            logging.getLogger('snowflake.connector').setLevel(logging.DEBUG)
-            sys.tracebacklimit = 3
 
         try:
             # validation of mandatory parameters. Produces ValueError
-            self.validate_configuration(MANDATORY_PARAMETERS)
+            self.validate_configuration_parameters(MANDATORY_PARAMETERS)
             self.parameters = Parameters(self.configuration.parameters.get(KEY_QUERY))
         except ValueError as e:
-            logging.exception(e)
-            exit(1)
+            raise UserException(e)
 
         self.kbc = KBCEnvironment(os.environ.get(KEY_RUNID, '@@@123'))
         self.snfk = SnowflakeCredentials(self.configuration.parameters[KEY_ACCT],
