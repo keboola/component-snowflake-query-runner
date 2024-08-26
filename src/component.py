@@ -120,7 +120,7 @@ if __name__ == "__main__":
     try:
         comp = Component()
         comp.execute_action()
-    except UserException as exc:
+    except (UserException, snowflake.connector.errors.DatabaseError) as exc:
         logging.exception(exc)
         exit(1)
     except Exception as exc:
