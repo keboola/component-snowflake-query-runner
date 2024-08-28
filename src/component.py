@@ -1,11 +1,11 @@
-from dataclasses import dataclass
 import logging
 import os
-from pathlib import Path
+import re
 import sys
-import snowflake.connector
+from dataclasses import dataclass
 
-from keboola.component import CommonInterface
+import snowflake.connector
+from keboola.component import ComponentBase, UserException
 
 # Snowflake database settings
 KEY_ACCT = 'account'
@@ -52,28 +52,18 @@ class Parameters:
     query: str
 
 
-class Component(CommonInterface):
+class Component(ComponentBase):
 
     def __init__(self):
-        default_data_dir = Path(__file__).resolve().parent.parent.joinpath('data').as_posix() \
-            if not os.environ.get('KBC_DATADIR') else None
-
-        logging.info(f'Running version {APP_VERSION}...')
-        super().__init__(data_folder_path=default_data_dir)
+        super().__init__()
         logging.getLogger('snowflake.connector').setLevel(logging.WARNING)
-
-        if self.configuration.parameters.get(KEY_DEBUG, False) is True:
-            logging.getLogger().setLevel(logging.DEBUG)
-            logging.getLogger('snowflake.connector').setLevel(logging.DEBUG)
-            sys.tracebacklimit = 3
 
         try:
             # validation of mandatory parameters. Produces ValueError
-            self.validate_configuration(MANDATORY_PARAMETERS)
+            self.validate_configuration_parameters(MANDATORY_PARAMETERS)
             self.parameters = Parameters(self.configuration.parameters.get(KEY_QUERY))
         except ValueError as e:
-            logging.exception(e)
-            exit(1)
+            raise UserException(e)
 
         self.kbc = KBCEnvironment(os.environ.get(KEY_RUNID, '@@@123'))
         self.snfk = SnowflakeCredentials(self.configuration.parameters[KEY_ACCT],
@@ -99,6 +89,13 @@ class Component(CommonInterface):
                                                          'QUERY_TAG': f'{{"runId":"{self.kbc.run_id}"}}'
                                                      })
 
+    @staticmethod
+    def split_sql_queries(sql_string):
+        # Regular expression to split by semicolons not inside quotes
+        queries = re.split(r';(?=(?:[^\'"]|\'[^\']*\'|"[^"]*")*$)', sql_string)
+        queries = [query.strip() for query in queries if query.strip()]
+        return queries
+
     def run(self):
 
         self.create_snfk_connection()
@@ -110,5 +107,22 @@ class Component(CommonInterface):
                     self._log_query(use_schema_sql)
                     snfk_cursor.execute(use_schema_sql)
 
-                self._log_query(self.parameters.query)
-                snfk_cursor.execute(self.parameters.query)
+                for query in self.split_sql_queries(self.parameters.query):
+                    query = query.strip()
+                    if query == '':
+                        continue
+                    query = query + ';'
+                    self._log_query(query)
+                    snfk_cursor.execute(query)
+
+
+if __name__ == "__main__":
+    try:
+        comp = Component()
+        comp.execute_action()
+    except (UserException, snowflake.connector.errors.DatabaseError) as exc:
+        logging.exception(exc)
+        exit(1)
+    except Exception as exc:
+        logging.exception(exc)
+        exit(2)
