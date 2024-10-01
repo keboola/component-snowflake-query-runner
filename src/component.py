@@ -91,8 +91,10 @@ class Component(ComponentBase):
 
     @staticmethod
     def split_sql_queries(sql_string):
-        # Regular expression to split by semicolons not inside quotes
-        queries = re.split(r';(?=(?:[^\'"]|\'[^\']*\'|"[^"]*")*$)', sql_string)
+        # taken from Keboola TR UI
+        pattern = (r"\s*((?:'[^'\\]*(?:\\.[^'\\]*)*'|\"[^\"\\]*(?:\\.[^\"\\]*)*\"|\$\$(?:.|\n|\r)*?\$\$|\/\*[^*]*\*+"
+                   r"(?:[^*/][^*]*\*+)*\/|#.*|--.*|\/\/.*|[^\"';#])+(?:;|$))")
+        queries = re.split(pattern, sql_string)
         queries = [query.strip() for query in queries if query.strip()]
         return queries
 
@@ -111,7 +113,6 @@ class Component(ComponentBase):
                     query = query.strip()
                     if query == '':
                         continue
-                    query = query + ';'
                     self._log_query(query)
                     snfk_cursor.execute(query)
 
