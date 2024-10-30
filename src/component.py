@@ -5,7 +5,8 @@ import sys
 from dataclasses import dataclass
 
 import snowflake.connector
-from keboola.component import ComponentBase, UserException
+from keboola.component.base import ComponentBase, sync_action
+from keboola.component.exceptions import UserException
 
 # Snowflake database settings
 KEY_ACCT = 'account'
@@ -97,6 +98,15 @@ class Component(ComponentBase):
         queries = re.split(pattern, sql_string)
         queries = [query.strip() for query in queries if query.strip()]
         return queries
+    
+    @sync_action("testConnection")
+    def test_connection(self):
+        try:
+            self.create_snfk_connection()
+            logging.info("Connection successful")
+            self.snfk_conn.close()
+        except snowflake.connector.errors.Error as e:
+            raise UserException(f"Connection failed: {e}")
 
     def run(self):
 
