@@ -98,7 +98,7 @@ class Component(ComponentBase):
         queries = re.split(pattern, sql_string)
         queries = [query.strip() for query in queries if query.strip()]
         return queries
-    
+
     @sync_action("testConnection")
     def test_connection(self):
         try:
