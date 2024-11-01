@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import snowflake.connector
 from keboola.component.base import ComponentBase, sync_action
 from keboola.component.exceptions import UserException
+from keboola.component.sync_actions import ValidationResult, MessageType
 
 # Snowflake database settings
 KEY_ACCT = 'account'
@@ -103,10 +104,11 @@ class Component(ComponentBase):
     def test_connection(self):
         try:
             self.create_snfk_connection()
-            logging.info("Connection successful")
             self.snfk_conn.close()
+            return ValidationResult("Connection successful.", MessageType.SUCCESS)
+
         except snowflake.connector.errors.Error as e:
-            raise UserException(f"Connection failed: {e}")
+            return ValidationResult(f"Connection failed: {e}", MessageType.WARNING)
 
     def run(self):
 

@@ -37,8 +37,10 @@
             "type": "button",
             "format": "sync-action",
             "options": {
-                "label": "TEST CONNECTION",
-                "action": "testConnection"
+                "async": {
+                    "label": "TEST CONNECTION",
+                    "action": "testConnection"
+                }
             },
             "propertyOrder": 500
         }
