@@ -60,13 +60,6 @@ class Component(ComponentBase):
         super().__init__()
         logging.getLogger('snowflake.connector').setLevel(logging.WARNING)
 
-        try:
-            # validation of mandatory parameters. Produces ValueError
-            self.validate_configuration_parameters(MANDATORY_PARAMETERS)
-            self.parameters = Parameters(self.configuration.parameters.get(KEY_QUERY))
-        except ValueError as e:
-            raise UserException(e)
-
         self.kbc = KBCEnvironment(os.environ.get(KEY_RUNID, '@@@123'))
         self.snfk = SnowflakeCredentials(self.configuration.parameters[KEY_ACCT],
                                          self.configuration.parameters[KEY_WRHS],
@@ -111,6 +104,12 @@ class Component(ComponentBase):
             return ValidationResult(f"Connection failed: {e}", MessageType.WARNING)
 
     def run(self):
+        try:
+            # validation of mandatory parameters. Produces ValueError
+            self.validate_configuration_parameters(MANDATORY_PARAMETERS)
+            self.parameters = Parameters(self.configuration.parameters.get(KEY_QUERY))
+        except ValueError as e:
+            raise UserException(e)
 
         self.create_snfk_connection()
 
