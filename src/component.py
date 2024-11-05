@@ -103,6 +103,9 @@ class Component(ComponentBase):
         except snowflake.connector.errors.Error as e:
             return ValidationResult(f"Connection failed: {e}", MessageType.WARNING)
 
+        except Exception as e:
+            return ValidationResult(f"Unexpected error: {e}", MessageType.WARNING)
+
     def run(self):
         try:
             # validation of mandatory parameters. Produces ValueError
