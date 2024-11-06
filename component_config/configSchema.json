@@ -32,6 +32,17 @@
             "type": "string",
             "description": "Name of the Snowflake warehouse to be used.",
             "propertyOrder": 400
+        },
+        "test_connection": {
+            "type": "button",
+            "format": "sync-action",
+            "options": {
+                "async": {
+                    "label": "TEST CONNECTION",
+                    "action": "testConnection"
+                }
+            },
+            "propertyOrder": 500
         }
     }
 }

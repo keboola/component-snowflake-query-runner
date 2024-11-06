@@ -5,7 +5,9 @@ import sys
 from dataclasses import dataclass
 
 import snowflake.connector
-from keboola.component import ComponentBase, UserException
+from keboola.component.base import ComponentBase, sync_action
+from keboola.component.exceptions import UserException
+from keboola.component.sync_actions import ValidationResult, MessageType
 
 # Snowflake database settings
 KEY_ACCT = 'account'
@@ -58,13 +60,6 @@ class Component(ComponentBase):
         super().__init__()
         logging.getLogger('snowflake.connector').setLevel(logging.WARNING)
 
-        try:
-            # validation of mandatory parameters. Produces ValueError
-            self.validate_configuration_parameters(MANDATORY_PARAMETERS)
-            self.parameters = Parameters(self.configuration.parameters.get(KEY_QUERY))
-        except ValueError as e:
-            raise UserException(e)
-
         self.kbc = KBCEnvironment(os.environ.get(KEY_RUNID, '@@@123'))
         self.snfk = SnowflakeCredentials(self.configuration.parameters[KEY_ACCT],
                                          self.configuration.parameters[KEY_WRHS],
@@ -98,7 +93,26 @@ class Component(ComponentBase):
         queries = [query.strip() for query in queries if query.strip()]
         return queries
 
+    @sync_action("testConnection")
+    def test_connection(self):
+        try:
+            self.create_snfk_connection()
+            self.snfk_conn.close()
+            return ValidationResult("Connection successful.", MessageType.SUCCESS)
+
+        except snowflake.connector.errors.Error as e:
+            return ValidationResult(f"Connection failed: {e}", MessageType.WARNING)
+
+        except Exception as e:
+            return ValidationResult(f"Unexpected error: {e}", MessageType.WARNING)
+
     def run(self):
+        try:
+            # validation of mandatory parameters. Produces ValueError
+            self.validate_configuration_parameters(MANDATORY_PARAMETERS)
+            self.parameters = Parameters(self.configuration.parameters.get(KEY_QUERY))
+        except ValueError as e:
+            raise UserException(e)
 
         self.create_snfk_connection()
 
