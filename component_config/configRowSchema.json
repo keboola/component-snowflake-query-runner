@@ -10,18 +10,18 @@
         "database": {
             "title": "Database",
             "type": "string",
-            "description": "Snowflake database in which the query will be executed.",
+            "description": "Snowflake database where the query will be executed",
             "propertyOrder": 100
         },
         "schema": {
             "title": "Schema",
-            "description": "Snowflake schema in which the query will be executed.",
+            "description": "Snowflake schema where the query will be executed",
             "type": "string",
             "propertyOrder": 200
         },
         "query": {
             "title": "Query",
-            "description": "Query to execute.",
+            "description": "Query to execute",
             "type": "string",
             "format": "textarea",
             "options": {
