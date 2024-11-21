@@ -23,9 +23,11 @@
             "title": "Query",
             "description": "Query to execute",
             "type": "string",
-            "format": "textarea",
+            "format": "editor",
             "options": {
-                "input_height": "150px"
+                "editor": {
+                    "mode": "text/x-sql"
+                }
             },
             "propertyOrder": 300
         }
