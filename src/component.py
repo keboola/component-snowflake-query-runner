@@ -16,6 +16,7 @@ KEY_USER = 'username'
 KEY_PASS = '#password'
 KEY_WRHS = 'warehouse'
 KEY_PRIVATE_KEY = 'private_key'
+KEY_PUBLIC_KEY = 'public_key'
 KEY_PRIVATE_KEY_PASS = 'private_key_passphrase'
 
 # Historize Tables

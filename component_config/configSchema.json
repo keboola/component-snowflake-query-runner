@@ -60,6 +60,18 @@
             },
             "propertyOrder": 400
         },
+        "#public_key": {
+            "title": "Public Key",
+            "type": "string",
+            "format": "textarea",
+            "description": "Public key used for authentication",
+            "options": {
+                "dependencies": {
+                  "auth_type": "key_pair"
+                }
+            },
+            "propertyOrder": 450
+        },
         "#private_key_passphrase": {
             "title": "Private Key Passphrase",
             "type": "string",
