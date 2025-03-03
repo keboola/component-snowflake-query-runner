@@ -16,16 +16,15 @@ KEY_ACCT = 'account'
 KEY_USER = 'username'
 KEY_PASS = '#password'
 KEY_WRHS = 'warehouse'
-KEY_PRIVATE_KEY = 'private_key'
-KEY_PUBLIC_KEY = 'public_key'
-KEY_PRIVATE_KEY_PASS = 'private_key_passphrase'
+KEY_PRIVATE_KEY = '#private_key'
+KEY_PRIVATE_KEY_PASS = '#private_key_passphrase'
 
 # Historize Tables
 KEY_DB = 'database'
 KEY_SCHEMA = 'schema'
 KEY_QUERY = 'query'
 
-MANDATORY_PARAMETERS = [KEY_ACCT, KEY_USER, KEY_PASS, KEY_WRHS, KEY_QUERY]
+MANDATORY_PARAMETERS = [KEY_ACCT, KEY_USER, KEY_WRHS, KEY_QUERY]
 
 KEY_RUNID = 'KBC_RUNID'
 
@@ -73,7 +72,7 @@ class Component(ComponentBase):
                                          self.configuration.parameters[KEY_ACCT],
                                          self.configuration.parameters[KEY_WRHS],
                                          self.configuration.parameters[KEY_USER],
-                                         self.configuration.parameters(KEY_PASS)
+                                         self.configuration.parameters.get(KEY_PASS)
                                          if self.configuration.parameters.get(KEY_PASS) != '' else None,
                                          self.configuration.parameters.get(KEY_PRIVATE_KEY)
                                          if self.configuration.parameters.get(KEY_PRIVATE_KEY) != '' else None,
@@ -101,7 +100,7 @@ class Component(ComponentBase):
         else:
             private_key_pem = self.snfk.private_key.encode('utf-8')
             passphrase = self.snfk.private_key_passphrase
-            password = passphrase.encode('utf-8') if passphrase else None
+            password = passphrase.encode('utf-8') if passphrase is not None else None
             private_key = serialization.load_pem_private_key(private_key_pem, password=password)
             private_key_der = private_key.private_bytes(
                 encoding=serialization.Encoding.DER,
