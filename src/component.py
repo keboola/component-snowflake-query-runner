@@ -3,6 +3,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass
+from cryptography.hazmat.primitives import serialization
 
 import snowflake.connector
 from keboola.component.base import ComponentBase, sync_action
@@ -98,11 +99,19 @@ class Component(ComponentBase):
                                                              'QUERY_TAG': f'{{"runId":"{self.kbc.run_id}"}}'
                                                          })
         else:
+            private_key_pem = self.snfk.private_key.encode('utf-8')
+            passphrase = self.snfk.private_key_passphrase
+            password = passphrase.encode('utf-8') if passphrase else None
+            private_key = serialization.load_pem_private_key(private_key_pem, password=password)
+            private_key_der = private_key.private_bytes(
+                encoding=serialization.Encoding.DER,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption()
+            )
             self.snfk_conn = snowflake.connector.connect(user=self.snfk.username,
                                                          account=self.snfk.host,
                                                          warehouse=self.snfk.warehouse,
-                                                         private_key=self.snfk.private_key,
-                                                         private_key_passphrase=self.snfk.private_key_passphrase,
+                                                         private_key=private_key_der,
                                                          database=self.snfk.database,
                                                          session_parameters={
                                                              'QUERY_TAG': f'{{"runId":"{self.kbc.run_id}"}}'
