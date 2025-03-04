@@ -3,6 +3,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass
+from cryptography.hazmat.primitives import serialization
 
 import snowflake.connector
 from keboola.component.base import ComponentBase, sync_action
@@ -10,17 +11,20 @@ from keboola.component.exceptions import UserException
 from keboola.component.sync_actions import ValidationResult, MessageType
 
 # Snowflake database settings
+KEY_AUTH_TYPE = 'auth_type'
 KEY_ACCT = 'account'
 KEY_USER = 'username'
 KEY_PASS = '#password'
 KEY_WRHS = 'warehouse'
+KEY_PRIVATE_KEY = '#private_key'
+KEY_PRIVATE_KEY_PASS = '#private_key_passphrase'
 
 # Historize Tables
 KEY_DB = 'database'
 KEY_SCHEMA = 'schema'
 KEY_QUERY = 'query'
 
-MANDATORY_PARAMETERS = [KEY_ACCT, KEY_USER, KEY_PASS, KEY_WRHS, KEY_QUERY]
+MANDATORY_PARAMETERS = [KEY_ACCT, KEY_USER, KEY_WRHS, KEY_QUERY]
 
 KEY_RUNID = 'KBC_RUNID'
 
@@ -35,10 +39,13 @@ sys.tracebacklimit = 0
 
 @dataclass
 class SnowflakeCredentials:
+    auth_type: str
     host: str
     warehouse: str
     username: str
     password: str
+    private_key: str
+    private_key_passphrase: str
     database: str
     schema: str
     cursor: snowflake.connector.cursor = snowflake.connector.DictCursor
@@ -61,10 +68,16 @@ class Component(ComponentBase):
         logging.getLogger('snowflake.connector').setLevel(logging.WARNING)
 
         self.kbc = KBCEnvironment(os.environ.get(KEY_RUNID, '@@@123'))
-        self.snfk = SnowflakeCredentials(self.configuration.parameters[KEY_ACCT],
+        self.snfk = SnowflakeCredentials(self.configuration.parameters[KEY_AUTH_TYPE],
+                                         self.configuration.parameters[KEY_ACCT],
                                          self.configuration.parameters[KEY_WRHS],
                                          self.configuration.parameters[KEY_USER],
-                                         self.configuration.parameters[KEY_PASS],
+                                         self.configuration.parameters.get(KEY_PASS)
+                                         if self.configuration.parameters.get(KEY_PASS) != '' else None,
+                                         self.configuration.parameters.get(KEY_PRIVATE_KEY)
+                                         if self.configuration.parameters.get(KEY_PRIVATE_KEY) != '' else None,
+                                         self.configuration.parameters.get(KEY_PRIVATE_KEY_PASS)
+                                         if self.configuration.parameters.get(KEY_PRIVATE_KEY_PASS) != '' else None,
                                          self.configuration.parameters.get(KEY_DB)
                                          if self.configuration.parameters.get(KEY_DB) != '' else None,
                                          self.configuration.parameters.get(KEY_SCHEMA)
@@ -76,13 +89,32 @@ class Component(ComponentBase):
 
     def create_snfk_connection(self):
 
-        self.snfk_conn = snowflake.connector.connect(user=self.snfk.username, password=self.snfk.password,
-                                                     account=self.snfk.host,
-                                                     database=self.snfk.database,
-                                                     warehouse=self.snfk.warehouse,
-                                                     session_parameters={
-                                                         'QUERY_TAG': f'{{"runId":"{self.kbc.run_id}"}}'
-                                                     })
+        if self.snfk.auth_type != 'key_pair':
+            self.snfk_conn = snowflake.connector.connect(user=self.snfk.username, password=self.snfk.password,
+                                                         account=self.snfk.host,
+                                                         database=self.snfk.database,
+                                                         warehouse=self.snfk.warehouse,
+                                                         session_parameters={
+                                                             'QUERY_TAG': f'{{"runId":"{self.kbc.run_id}"}}'
+                                                         })
+        else:
+            private_key_pem = self.snfk.private_key.encode('utf-8')
+            passphrase = self.snfk.private_key_passphrase
+            password = passphrase.encode('utf-8') if passphrase is not None else None
+            private_key = serialization.load_pem_private_key(private_key_pem, password=password)
+            private_key_der = private_key.private_bytes(
+                encoding=serialization.Encoding.DER,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption()
+            )
+            self.snfk_conn = snowflake.connector.connect(user=self.snfk.username,
+                                                         account=self.snfk.host,
+                                                         warehouse=self.snfk.warehouse,
+                                                         private_key=private_key_der,
+                                                         database=self.snfk.database,
+                                                         session_parameters={
+                                                             'QUERY_TAG': f'{{"runId":"{self.kbc.run_id}"}}'
+                                                         })
 
     @staticmethod
     def split_sql_queries(sql_string):
