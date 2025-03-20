@@ -72,16 +72,11 @@ class Component(ComponentBase):
                                          self.configuration.parameters[KEY_ACCT],
                                          self.configuration.parameters[KEY_WRHS],
                                          self.configuration.parameters[KEY_USER],
-                                         self.configuration.parameters.get(KEY_PASS)
-                                         if self.configuration.parameters.get(KEY_PASS) != '' else None,
-                                         self.configuration.parameters.get(KEY_PRIVATE_KEY)
-                                         if self.configuration.parameters.get(KEY_PRIVATE_KEY) != '' else None,
-                                         self.configuration.parameters.get(KEY_PRIVATE_KEY_PASS)
-                                         if self.configuration.parameters.get(KEY_PRIVATE_KEY_PASS) != '' else None,
-                                         self.configuration.parameters.get(KEY_DB)
-                                         if self.configuration.parameters.get(KEY_DB) != '' else None,
-                                         self.configuration.parameters.get(KEY_SCHEMA)
-                                         if self.configuration.parameters.get(KEY_SCHEMA) != '' else None,
+                                         self.configuration.parameters.get(KEY_PASS) or None,
+                                         self.configuration.parameters.get(KEY_PRIVATE_KEY) or None,
+                                         self.configuration.parameters.get(KEY_PRIVATE_KEY_PASS) or None,
+                                         self.configuration.parameters.get(KEY_DB) or None,
+                                         self.configuration.parameters.get(KEY_SCHEMA) or None,
                                          snowflake.connector.DictCursor)
 
         if self.snfk.password and self.snfk.private_key:
