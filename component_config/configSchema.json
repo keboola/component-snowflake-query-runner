@@ -8,6 +8,22 @@
         "warehouse"
     ],
     "properties": {
+        "auth_type": {
+            "title": "Authentication Type",
+            "type": "string",
+            "enum": [
+                "password",
+                "key_pair"
+            ],
+            "default": "key_pair",
+            "options": {
+                "enum_titles": [
+                    "Password",
+                    "Key Pair"
+                ]
+            },
+            "propertyOrder": 0
+        },
         "account": {
             "title": "Account",
             "type": "string",
@@ -25,13 +41,42 @@
             "type": "string",
             "format": "password",
             "description": "Password authenticating the Snowflake user",
+            "options": {
+                "dependencies": {
+                  "auth_type": "password"
+                }
+            },
             "propertyOrder": 300
+        },
+        "#private_key": {
+            "title": "Private Key",
+            "type": "string",
+            "format": "textarea",
+            "description": "Private key used for authentication",
+            "options": {
+                "dependencies": {
+                  "auth_type": "key_pair"
+                }
+            },
+            "propertyOrder": 400
+        },
+        "#private_key_passphrase": {
+            "title": "Private Key Passphrase",
+            "type": "string",
+            "format": "password",
+            "description": "Passphrase for the private key",
+            "options": {
+                "dependencies": {
+                  "auth_type": "key_pair"
+                }
+            },
+            "propertyOrder": 500
         },
         "warehouse": {
             "title": "Warehouse",
             "type": "string",
             "description": "Name of the Snowflake warehouse to be used",
-            "propertyOrder": 400
+            "propertyOrder": 600
         },
         "test_connection": {
             "type": "button",
@@ -42,7 +87,7 @@
                     "action": "testConnection"
                 }
             },
-            "propertyOrder": 500
+            "propertyOrder": 700
         }
     }
 }
