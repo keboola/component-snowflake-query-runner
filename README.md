@@ -18,8 +18,19 @@ The following parameters need to be specified to connect successfully to a Snowf
 
 - `account`: Snowflake account name [(see Snowflake documentation for more information)](https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name)
 - `username`: Snowflake user that will be used to log in to the instance
-- `#password`: Password for the specified Snowflake user
 - `warehouse`: Name of the Snowflake warehouse where queries will be run
+- `auth_type`: Authentication method to use. Can be either:
+  - `key_pair` (default): Use key-pair authentication
+  - `password`: Use password-based authentication
+
+For key-pair authentication:
+- `#private_key`: Private key for authentication
+- `#private_key_passphrase`: (Optional) Passphrase for the private key
+
+For password-based authentication:
+- `#password`: Password for the specified Snowflake user
+
+Note: Only one authentication method can be used at a time - either password or key-pair authentication.
 
 ## Row-Specific Parameters
 
