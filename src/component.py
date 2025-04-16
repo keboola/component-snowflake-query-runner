@@ -100,24 +100,38 @@ class Component(ComponentBase):
             )
         else:
             private_key_pem = self.snfk.private_key.encode("utf-8")
-            passphrase = self.snfk.private_key_passphrase
-            password = passphrase.encode("utf-8") if passphrase is not None else None
-            private_key = serialization.load_pem_private_key(
-                private_key_pem, password=password
-            )
-            private_key_der = private_key.private_bytes(
-                encoding=serialization.Encoding.DER,
-                format=serialization.PrivateFormat.PKCS8,
-                encryption_algorithm=serialization.NoEncryption(),
-            )
-            self.snfk_conn = snowflake.connector.connect(
-                user=self.snfk.username,
-                account=self.snfk.host,
-                warehouse=self.snfk.warehouse,
-                private_key=private_key_der,
-                database=self.snfk.database,
-                session_parameters={"QUERY_TAG": f'{{"runId":"{self.kbc.run_id}"}}'},
-            )
+            passphrase = self.snfk.private_key_passphrase.encode("utf-8") or None
+
+            if private_key_pem:
+                private_key = serialization.load_pem_private_key(
+                    private_key_pem, password=passphrase
+                )
+                private_key_der = private_key.private_bytes(
+                    encoding=serialization.Encoding.DER,
+                    format=serialization.PrivateFormat.PKCS8,
+                    encryption_algorithm=serialization.NoEncryption(),
+                )
+                self.snfk_conn = snowflake.connector.connect(
+                    user=self.snfk.username,
+                    account=self.snfk.host,
+                    warehouse=self.snfk.warehouse,
+                    private_key=private_key_der,
+                    database=self.snfk.database,
+                    session_parameters={
+                        "QUERY_TAG": f'{{"runId":"{self.kbc.run_id}"}}'
+                    },
+                )
+            else:
+                self.snfk_conn = snowflake.connector.connect(
+                    user=self.snfk.username,
+                    password=self.snfk.password,
+                    account=self.snfk.host,
+                    database=self.snfk.database,
+                    warehouse=self.snfk.warehouse,
+                    session_parameters={
+                        "QUERY_TAG": f'{{"runId":"{self.kbc.run_id}"}}'
+                    },
+                )
 
     @staticmethod
     def split_sql_queries(sql_string):
