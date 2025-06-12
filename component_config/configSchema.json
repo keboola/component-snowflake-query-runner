@@ -6,18 +6,6 @@
         "username",
         "warehouse"
     ],
-    "anyOf": [
-        {
-            "required": [
-                "#password"
-            ]
-        },
-        {
-            "required": [
-                "#private_key"
-            ]
-        }
-    ],
     "properties": {
         "auth_type": {
             "title": "Authentication Type",
