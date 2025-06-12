@@ -4,8 +4,19 @@
     "required": [
         "account",
         "username",
-        "#password",
         "warehouse"
+    ],
+    "anyOf": [
+        {
+            "required": [
+                "#password"
+            ]
+        },
+        {
+            "required": [
+                "#private_key"
+            ]
+        }
     ],
     "properties": {
         "auth_type": {
