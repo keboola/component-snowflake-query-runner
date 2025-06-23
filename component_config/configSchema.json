@@ -24,7 +24,7 @@
             "propertyOrder": 0
         },
         "account": {
-            "title": "Account",
+            "title": "Account Identifier",
             "type": "string",
             "description": "Account identifier of the Snowflake instance. This is a prefix of your Snowflake instance URL, e.g., <strong>keboola.eu-central-1</strong>.</br>See <a href='https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name'>the documentation for more information</a>.",
             "propertyOrder": 100
