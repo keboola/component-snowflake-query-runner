@@ -4,8 +4,8 @@ Snowflake offers a cloud-based data storage and analytics service known as "data
 
 This application enables you to run any query against your Snowflake warehouse directly from the Keboola platform.
 
-**Table of contents:**  
-  
+**Table of contents:**
+
 [TOC]
 
 # Configuration
@@ -16,7 +16,7 @@ The application is row-based, and as such, accepts configuration-specific parame
 
 The following parameters need to be specified to connect successfully to a Snowflake instance:
 
-- `account`: Snowflake account name [(see Snowflake documentation for more information)](https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name)
+- `account identifier`: Snowflake account name [(see Snowflake documentation for more information)](https://docs.snowflake.com/en/user-guide/connecting.html#your-snowflake-account-name)
 - `username`: Snowflake user that will be used to log in to the instance
 - `warehouse`: Name of the Snowflake warehouse where queries will be run
 - `auth_type`: Authentication method to use. Can be either:
@@ -67,4 +67,4 @@ docker-compose run --rm test
 
 # Integration
 
-For information about deployment and integration with Keboola, please refer to the [deployment section of the developer documentation](https://developers.keboola.com/extend/component/deployment/). 
+For information about deployment and integration with Keboola, please refer to the [deployment section of the developer documentation](https://developers.keboola.com/extend/component/deployment/).
