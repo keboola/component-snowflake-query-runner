@@ -19,6 +19,8 @@ KEY_WRHS = "warehouse"
 KEY_PRIVATE_KEY = "#private_key"
 KEY_PRIVATE_KEY_PASS = "#private_key_passphrase"
 
+KEY_STATEMENT_TIMEOUT = "statement_timeout"
+
 # Historize Tables
 KEY_DB = "database"
 KEY_SCHEMA = "schema"
@@ -82,13 +84,26 @@ class Component(ComponentBase):
             snowflake.connector.DictCursor,
         )
 
+        self.statement_timeout = parameters.get(KEY_STATEMENT_TIMEOUT) or 0
+
         if self.snfk.password and self.snfk.private_key:
             raise UserException("Only one of password and private key can be set.")
 
     def _log_query(self, query):
         logging.info(f"Running query: {query}")
 
+    def _build_session_parameters(self):
+        params = {
+            "QUERY_TAG": f'{{"runId":"{self.kbc.run_id}"}}',
+            "ABORT_DETACHED_QUERY": True,
+        }
+        if self.statement_timeout:
+            params["STATEMENT_TIMEOUT_IN_SECONDS"] = self.statement_timeout
+        return params
+
     def create_snfk_connection(self):
+        session_parameters = self._build_session_parameters()
+
         if self.snfk.auth_type != "key_pair" or not self.snfk.private_key:
             self.snfk_conn = snowflake.connector.connect(
                 user=self.snfk.username,
@@ -96,7 +111,7 @@ class Component(ComponentBase):
                 account=self.snfk.host,
                 database=self.snfk.database,
                 warehouse=self.snfk.warehouse,
-                session_parameters={"QUERY_TAG": f'{{"runId":"{self.kbc.run_id}"}}'},
+                session_parameters=session_parameters,
             )
         else:
             private_key_pem = self.snfk.private_key.encode("utf-8")
@@ -116,7 +131,7 @@ class Component(ComponentBase):
                 warehouse=self.snfk.warehouse,
                 private_key=private_key_der,
                 database=self.snfk.database,
-                session_parameters={"QUERY_TAG": f'{{"runId":"{self.kbc.run_id}"}}'},
+                session_parameters=session_parameters,
             )
 
     @staticmethod

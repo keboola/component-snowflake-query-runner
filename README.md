@@ -32,6 +32,14 @@ For password-based authentication:
 
 Note: Only one authentication method can be used at a time - either password or key-pair authentication.
 
+## Optional Parameters
+
+- `statement_timeout`: Maximum execution time for each SQL statement in seconds. Queries exceeding this limit will be cancelled by Snowflake. Set to `0` or leave empty for no limit.
+
+### Orphan Query Protection
+
+The component automatically sets the Snowflake session parameter `ABORT_DETACHED_QUERY = TRUE`. This ensures that if the Keboola job container is terminated (e.g., on timeout or manual cancellation), any in-flight queries on Snowflake are aborted within approximately 5 minutes instead of running to completion on the warehouse.
+
 ## Row-Specific Parameters
 
 Each row allows to specify a query to be run, as well as a database and schema to be used. Parameters are:

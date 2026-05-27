@@ -77,6 +77,12 @@
             "description": "Name of the Snowflake warehouse to be used",
             "propertyOrder": 600
         },
+        "statement_timeout": {
+            "title": "Statement Timeout (seconds)",
+            "type": "integer",
+            "description": "Maximum execution time for each SQL statement in seconds. Queries exceeding this limit will be cancelled by Snowflake. Leave empty or set to 0 for no limit.",
+            "propertyOrder": 700
+        },
         "test_connection": {
             "type": "button",
             "format": "sync-action",
@@ -86,7 +92,7 @@
                     "action": "testConnection"
                 }
             },
-            "propertyOrder": 700
+            "propertyOrder": 800
         }
     }
 }
