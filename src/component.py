@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -94,7 +95,7 @@ class Component(ComponentBase):
 
     def _build_session_parameters(self):
         params = {
-            "QUERY_TAG": f'{{"runId":"{self.kbc.run_id}"}}',
+            "QUERY_TAG": json.dumps({"runId": self.kbc.run_id}),
             "ABORT_DETACHED_QUERY": True,
         }
         if self.statement_timeout:
