@@ -89,6 +89,18 @@ class Component(ComponentBase):
         logging.info(f"Running query: {query}")
 
     def create_snfk_connection(self):
+        if self.snfk.auth_type == "key_pair" and not self.snfk.private_key:
+            if not self.snfk.password:
+                raise UserException(
+                    "Key Pair authentication is selected, but no private key is set. "
+                    "Add the private key to the configuration."
+                )
+            logging.warning(
+                "Key Pair authentication is selected, but no private key is set. "
+                "Falling back to password authentication. Snowflake is blocking password sign-in "
+                "for service users; add a private key to keep this configuration working."
+            )
+
         if self.snfk.auth_type != "key_pair" or not self.snfk.private_key:
             self.snfk_conn = snowflake.connector.connect(
                 user=self.snfk.username,
@@ -136,6 +148,9 @@ class Component(ComponentBase):
             self.create_snfk_connection()
             self.snfk_conn.close()
             return ValidationResult("Connection successful.", MessageType.SUCCESS)
+
+        except UserException as e:
+            return ValidationResult(str(e), MessageType.WARNING)
 
         except snowflake.connector.errors.Error as e:
             return ValidationResult(f"Connection failed: {e}", MessageType.WARNING)
