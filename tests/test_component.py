@@ -59,12 +59,11 @@ class TestSnowflakeConnection(unittest.TestCase):
         connect.assert_not_called()
 
     @mock.patch("component.snowflake.connector.connect")
-    def test_key_pair_without_private_key_falls_back_to_password_with_warning(self, connect):
+    def test_key_pair_without_private_key_and_with_password_raises_user_exception(self, connect):
         comp = _component_with_credentials("key_pair", password="secret")
-        with self.assertLogs(level="WARNING") as logs:
+        with self.assertRaisesRegex(UserException, "no private key is set"):
             comp.create_snfk_connection()
-        self.assertIn("Falling back to password authentication", logs.output[0])
-        self.assertEqual(connect.call_args.kwargs["password"], "secret")
+        connect.assert_not_called()
 
     @mock.patch("component.snowflake.connector.connect")
     def test_password_auth_does_not_warn(self, connect):
