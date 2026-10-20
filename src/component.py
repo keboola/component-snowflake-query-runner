@@ -82,9 +82,6 @@ class Component(ComponentBase):
             snowflake.connector.DictCursor,
         )
 
-        if self.snfk.password and self.snfk.private_key:
-            raise UserException("Only one of password and private key can be set.")
-
     def _log_query(self, query):
         logging.info(f"Running query: {query}")
 
