@@ -82,14 +82,18 @@ class Component(ComponentBase):
             snowflake.connector.DictCursor,
         )
 
-        if self.snfk.password and self.snfk.private_key:
-            raise UserException("Only one of password and private key can be set.")
-
     def _log_query(self, query):
         logging.info(f"Running query: {query}")
 
     def create_snfk_connection(self):
-        if self.snfk.auth_type != "key_pair" or not self.snfk.private_key:
+        if self.snfk.auth_type == "key_pair" and not self.snfk.private_key:
+            raise UserException(
+                "Key Pair authentication is selected, but no private key is set. "
+                "Since October 2026, Snowflake has blocked password sign-in for service users. "
+                "Add a private key to the configuration."
+            )
+
+        if self.snfk.auth_type != "key_pair":
             self.snfk_conn = snowflake.connector.connect(
                 user=self.snfk.username,
                 password=self.snfk.password,
@@ -136,6 +140,9 @@ class Component(ComponentBase):
             self.create_snfk_connection()
             self.snfk_conn.close()
             return ValidationResult("Connection successful.", MessageType.SUCCESS)
+
+        except UserException as e:
+            return ValidationResult(str(e), MessageType.WARNING)
 
         except snowflake.connector.errors.Error as e:
             return ValidationResult(f"Connection failed: {e}", MessageType.WARNING)
